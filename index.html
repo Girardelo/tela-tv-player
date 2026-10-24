@@ -26,6 +26,7 @@
     if (!p || !c) return;
     if (c === 'alternar') p.getPlayerState() === 1 ? p.pauseVideo() : p.playVideo();
     if (c === 'tocar') p.playVideo();
+    if (c === 'pausar') p.pauseVideo();
     if (c === 'avancar') p.nextVideo();
     if (c === 'voltar') p.previousVideo();
     setTimeout(enviar, 600);
