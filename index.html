@@ -29,9 +29,9 @@
   function enviar() {
     if (!p || !p.getVideoData) return;
     const d = p.getVideoData();
-    parent.postMessage({ tipo: 'estado', titulo: d.title, autor: d.author, tocando: p.getPlayerState() === 1, estado: p.getPlayerState() }, '*');
+    parent.postMessage({ tipo: 'estado', titulo: d.title, autor: d.author, tocando: p.getPlayerState() === 1, estado: p.getPlayerState(), tempo: p.getCurrentTime ? p.getCurrentTime() : 0, duracao: p.getDuration ? p.getDuration() : 0 }, '*');
   }
-  setInterval(enviar, 2000);
+  setInterval(enviar, 1000);
   addEventListener('message', ev => {
     const c = ev.data && ev.data.cmd;
     if (!c) return;
