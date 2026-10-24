@@ -11,13 +11,13 @@
   function onYouTubeIframeAPIReady() {
     p = new YT.Player('p', {
       width: '100%', height: '100%',
-      playerVars: { listType: 'playlist', list: LISTA, autoplay: 1, controls: 0, rel: 0, playsinline: 1, loop: 1 },
+      playerVars: { listType: 'playlist', list: LISTA, autoplay: 0, controls: 0, rel: 0, playsinline: 1, loop: 1 },
       events: { onReady: pronto, onStateChange: enviar, onError: e => parent.postMessage({ tipo: 'erro', codigo: e.data }, '*') }
     });
   }
   // comando que chegou antes do player ficar pronto roda assim que ele fica
   let pendente = null, preparado = false;
-  function pronto() { preparado = true; parent.postMessage({ tipo: 'pronto' }, '*'); if (pendente) { executar(pendente); pendente = null; } else p.playVideo(); }
+  function pronto() { preparado = true; parent.postMessage({ tipo: 'pronto' }, '*'); if (pendente) { executar(pendente); pendente = null; } }
   function executar(c) {
     if (c === 'alternar') p.getPlayerState() === 1 ? p.pauseVideo() : p.playVideo();
     if (c === 'tocar') p.playVideo();
