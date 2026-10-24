@@ -12,8 +12,19 @@
     p = new YT.Player('p', {
       width: '100%', height: '100%',
       playerVars: { listType: 'playlist', list: LISTA, autoplay: 1, controls: 0, rel: 0, playsinline: 1, loop: 1 },
-      events: { onReady: e => e.target.playVideo(), onStateChange: enviar, onError: e => parent.postMessage({ tipo: 'erro', codigo: e.data }, '*') }
+      events: { onReady: pronto, onStateChange: enviar, onError: e => parent.postMessage({ tipo: 'erro', codigo: e.data }, '*') }
     });
+  }
+  // comando que chegou antes do player ficar pronto roda assim que ele fica
+  let pendente = null, preparado = false;
+  function pronto() { preparado = true; parent.postMessage({ tipo: 'pronto' }, '*'); if (pendente) { executar(pendente); pendente = null; } else p.playVideo(); }
+  function executar(c) {
+    if (c === 'alternar') p.getPlayerState() === 1 ? p.pauseVideo() : p.playVideo();
+    if (c === 'tocar') p.playVideo();
+    if (c === 'pausar') p.pauseVideo();
+    if (c === 'avancar') p.nextVideo();
+    if (c === 'voltar') p.previousVideo();
+    setTimeout(enviar, 600);
   }
   function enviar() {
     if (!p || !p.getVideoData) return;
@@ -23,13 +34,9 @@
   setInterval(enviar, 2000);
   addEventListener('message', ev => {
     const c = ev.data && ev.data.cmd;
-    if (!p || !c) return;
-    if (c === 'alternar') p.getPlayerState() === 1 ? p.pauseVideo() : p.playVideo();
-    if (c === 'tocar') p.playVideo();
-    if (c === 'pausar') p.pauseVideo();
-    if (c === 'avancar') p.nextVideo();
-    if (c === 'voltar') p.previousVideo();
-    setTimeout(enviar, 600);
+    if (!c) return;
+    if (!preparado) { pendente = c; return; }
+    executar(c);
   });
 </script>
 <script src="https://www.youtube.com/iframe_api"></script>
