@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>Player da tela da TV</title>
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<style>html, body { margin: 0; background: #000; overflow: hidden; } #p { width: 100vw; height: 100vh; }</style>
+</head><body>
+<div id="p"></div>
+<script>
+  // Player do YouTube que a tela da TV mostra num canto; recebe comandos (voltar, pausar, avançar) e devolve o estado
+  const LISTA = new URLSearchParams(location.search).get('list') || 'PLUJG0DHpl7us';
+  let p;
+  function onYouTubeIframeAPIReady() {
+    p = new YT.Player('p', {
+      width: '100%', height: '100%',
+      playerVars: { listType: 'playlist', list: LISTA, autoplay: 1, controls: 0, rel: 0, playsinline: 1, loop: 1 },
+      events: { onReady: e => e.target.playVideo(), onStateChange: enviar, onError: e => parent.postMessage({ tipo: 'erro', codigo: e.data }, '*') }
+    });
+  }
+  function enviar() {
+    if (!p || !p.getVideoData) return;
+    const d = p.getVideoData();
+    parent.postMessage({ tipo: 'estado', titulo: d.title, autor: d.author, tocando: p.getPlayerState() === 1, estado: p.getPlayerState() }, '*');
+  }
+  setInterval(enviar, 2000);
+  addEventListener('message', ev => {
+    const c = ev.data && ev.data.cmd;
+    if (!p || !c) return;
+    if (c === 'alternar') p.getPlayerState() === 1 ? p.pauseVideo() : p.playVideo();
+    if (c === 'tocar') p.playVideo();
+    if (c === 'avancar') p.nextVideo();
+    if (c === 'voltar') p.previousVideo();
+    setTimeout(enviar, 600);
+  });
+</script>
+<script src="https://www.youtube.com/iframe_api"></script>
+</body></html>
